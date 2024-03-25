@@ -6,7 +6,7 @@ namespace Catalog.API.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class CatalogController
+    public class CatalogController : ControllerBase
     {
         private readonly IProductRepository _repository;
 
@@ -19,7 +19,7 @@ namespace Catalog.API.Controllers
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
             var products = await _repository.GetProducts();
-            return products.ToList();
+            return Ok(products);
         }
 
         [HttpGet("{id:length(24)}", Name = "GetProduct")]
@@ -28,9 +28,9 @@ namespace Catalog.API.Controllers
             var product = await _repository.GetProduct(id);
             if (product == null)
             {
-                return null;
+                return NotFound();
             }
-            return product;
+            return Ok(product);
         }
 
         [HttpGet]
@@ -38,28 +38,26 @@ namespace Catalog.API.Controllers
         public async Task<ActionResult<IEnumerable<Product>>> GetProductByCategory(string category)
         {
             var products = await _repository.GetProductByCategory(category);
-            return products.ToList();
+            return Ok(products);
         }
 
         [HttpPost]
         public async Task<ActionResult<Product>> CreateProduct([FromBody] Product product)
         {
             await _repository.CreateProduct(product);
-            return product;
+            return CreatedAtRoute("GetProduct", new { id = product.Id }, product);
         }
 
         [HttpPut]
         public async Task<ActionResult<bool>> UpdateProduct([FromBody] Product product)
         {
-            return await _repository.UpdateProduct(product);
+            return Ok(await _repository.UpdateProduct(product));
         }
 
         [HttpDelete("{id:length(24)}")]
         public async Task<ActionResult<bool>> DeleteProductById(string id)
         {
-            return await _repository.DeleteProduct(id);
+            return Ok(await _repository.DeleteProduct(id));
         }
-
-
     }
 }
